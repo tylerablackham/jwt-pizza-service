@@ -17,7 +17,6 @@ const newItem = {
 
 let adminUser;
 let adminUserAuthToken;
-let adminUserId;
 
 const newFranchise = {
   name: randomName(),
