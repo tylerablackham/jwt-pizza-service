@@ -1,3 +1,3 @@
 if (process.env.DEBUG) {
-    jest.setTimeout(Infinity);
+  jest.setTimeout(Infinity);
 }
