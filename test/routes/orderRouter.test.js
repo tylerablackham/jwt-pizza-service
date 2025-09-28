@@ -31,6 +31,19 @@ const newStore = {
 };
 let newStoreId;
 
+const newOrder = {
+  franchiseId: undefined,
+  storeId: undefined,
+  items: [
+    {
+      menuId: undefined,
+      description: newItem.description,
+      price: newItem.price,
+    },
+  ],
+};
+let newOrderId;
+
 beforeAll(async () => {
   testUser.name = randomName();
   testUser.email = testUser.name + "@test.com";
@@ -58,6 +71,9 @@ beforeAll(async () => {
     .send(newStore);
   expect(createStoreRes.status).toBe(200);
   newStoreId = createStoreRes.body.id;
+
+  newOrder.franchiseId = newFranchiseId;
+  newOrder.storeId = newStoreId;
 });
 
 test("add item to pizza menu", async () => {
@@ -77,6 +93,8 @@ test("add item to pizza menu", async () => {
   expect(addItemRes.body).toEqual(
     expect.arrayContaining([expect.objectContaining(newItem)]),
   );
+  newOrder.items[0].menuId =
+    addItemRes.body.find((item) => (item.title = newItem.title))?.id ?? -1;
 });
 
 test("get pizza menu", async () => {
@@ -84,5 +102,43 @@ test("get pizza menu", async () => {
   expect(getMenuRes.status).toBe(200);
   expect(getMenuRes.body).toEqual(
     expect.arrayContaining([expect.objectContaining(newItem)]),
+  );
+});
+
+test("create order", async () => {
+  const createOrderRes = await request(app)
+    .post("/api/order")
+    .set("Authorization", `Bearer ${testUserAuthToken}`)
+    .send(newOrder);
+  expect(createOrderRes.status).toBe(200);
+  expect(createOrderRes.body).toEqual(
+    expect.objectContaining({
+      order: expect.objectContaining({
+        franchiseId: newFranchiseId,
+        storeId: newStoreId,
+        items: expect.arrayContaining([
+          expect.objectContaining({ menuId: newOrder.items[0].menuId }),
+        ]),
+      }),
+      jwt: expect.any(String),
+    }),
+  );
+  expectValidJwt(createOrderRes.body.jwt);
+  newOrderId = createOrderRes.body.order.id;
+});
+
+test("get order", async () => {
+  const getOrderRes = await request(app)
+    .get("/api/order")
+    .set("Authorization", `Bearer ${testUserAuthToken}`);
+  expect(getOrderRes.status).toBe(200);
+  expect(getOrderRes.body).toEqual(
+    expect.objectContaining({
+      orders: expect.arrayContaining([
+        expect.objectContaining({
+          id: newOrderId,
+        }),
+      ]),
+    }),
   );
 });
