@@ -54,7 +54,6 @@ beforeAll(async () => {
   const loginRes = await request(app).put("/api/auth").send(adminUser);
   adminUserAuthToken = loginRes.body.token;
   expectValidJwt(adminUserAuthToken);
-  adminUserId = loginRes.body.user.id;
   newFranchise.admins.push({ email: adminUser.email });
 
   const createFranchiseRes = await request(app)
