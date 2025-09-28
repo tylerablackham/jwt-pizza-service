@@ -1,7 +1,6 @@
 const request = require('supertest');
 const app = require('../../src/service');
 const {expectValidJwt, createAdminUser, randomName} = require("../../src/util/testHelper");
-const {del} = require("express/lib/application");
 
 let adminUser
 let adminUserAuthToken;
