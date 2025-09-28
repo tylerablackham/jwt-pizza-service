@@ -10,7 +10,7 @@ franchiseRouter.docs = [
     method: 'GET',
     path: '/api/franchise?page=0&limit=10&name=*',
     description: 'List all the franchises',
-    example: `curl localhost:3000/api/franchise&page=0&limit=10&name=pizzaPocket`,
+    example: `curl localhost:3000/api/franchise?page=0&limit=10&name=pizzaPocket`,
     response: { franchises: [{ id: 1, name: 'pizzaPocket', admins: [{ id: 4, name: 'pizza franchisee', email: 'f@jwt.com' }], stores: [{ id: 1, name: 'SLC', totalRevenue: 0 }] }], more: true },
   },
   {
