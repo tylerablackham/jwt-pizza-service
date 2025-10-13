@@ -86,3 +86,32 @@ test("list users", async () => {
     listUsersRes.body.users[0].id,
   );
 });
+
+test("delete user unauthorized", async () => {
+  const deleteUserRes = await request(app).delete(`/api/user/${testUserId}`);
+  expect(deleteUserRes.status).toBe(401);
+
+  const deleteUserRes2 = await request(app)
+    .delete(`/api/user/${adminUserId}`)
+    .set("Authorization", "Bearer " + testUserAuthToken);
+  expect(deleteUserRes2.status).toBe(403);
+});
+
+test("delete user", async () => {
+  const deleteUserRes = await request(app)
+    .delete(`/api/user/${testUserId}`)
+    .set("Authorization", "Bearer " + testUserAuthToken);
+  expect(deleteUserRes.status).toBe(200);
+  expect(deleteUserRes.body.message).toBe("user deleted");
+
+  const registerRes = await request(app).post("/api/auth").send(testUser);
+  testUserId = registerRes.body.user.id;
+  testUserAuthToken = registerRes.body.token;
+  expectValidJwt(testUserAuthToken);
+
+  const deleteUserRes2 = await request(app)
+    .delete(`/api/user/${testUserId}`)
+    .set("Authorization", "Bearer " + adminUserAuthToken);
+  expect(deleteUserRes2.status).toBe(200);
+  expect(deleteUserRes2.body.message).toBe("user deleted");
+});
