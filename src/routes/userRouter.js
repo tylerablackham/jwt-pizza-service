@@ -8,6 +8,23 @@ const userRouter = express.Router();
 userRouter.docs = [
   {
     method: "GET",
+    path: "/api/user?page=1&limit=10&name=*",
+    requiresAuth: true,
+    description: "Gets a list of users",
+    example: `curl -X GET localhost:3000/api/user -H 'Authorization: Bearer tttttt'`,
+    response: {
+      users: [
+        {
+          id: 1,
+          name: "常用名字",
+          email: "a@jwt.com",
+          roles: [{ role: "admin" }],
+        },
+      ],
+    },
+  },
+  {
+    method: "GET",
     path: "/api/user/me",
     requiresAuth: true,
     description: "Get authenticated user",
@@ -36,6 +53,24 @@ userRouter.docs = [
     },
   },
 ];
+
+// listUsers
+userRouter.get(
+  "/",
+  authRouter.authenticateToken,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+    if (!user.isRole(Role.Admin)) {
+      return res.status(403).json({ message: "unauthorized" });
+    }
+    const [users, more] = await DB.getUsers(
+      req.query.page,
+      req.query.limit,
+      req.query.name,
+    );
+    res.json({ users, more });
+  }),
+);
 
 // getUser
 userRouter.get(
