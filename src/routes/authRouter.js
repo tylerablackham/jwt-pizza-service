@@ -3,8 +3,11 @@ const jwt = require("jsonwebtoken");
 const config = require("../config.js");
 const { asyncHandler } = require("../endpointHelper.js");
 const { DB, Role } = require("../database/database.js");
+const { incActiveUsers, decActiveUsers, authSuccess } = require("../metrics");
 
 const authRouter = express.Router();
+
+authRouter.use(authSuccess);
 
 authRouter.docs = [
   {
@@ -89,6 +92,7 @@ authRouter.post(
       roles: [{ role: Role.Diner }],
     });
     const auth = await setAuth(user);
+    incActiveUsers();
     res.json({ user: user, token: auth });
   }),
 );
@@ -100,6 +104,7 @@ authRouter.put(
     const { email, password } = req.body;
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
+    incActiveUsers();
     res.json({ user: user, token: auth });
   }),
 );
@@ -110,6 +115,7 @@ authRouter.delete(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     await clearAuth(req);
+    decActiveUsers();
     res.json({ message: "logout successful" });
   }),
 );

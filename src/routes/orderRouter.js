@@ -3,6 +3,7 @@ const config = require("../config.js");
 const { Role, DB } = require("../database/database.js");
 const { authRouter } = require("./authRouter.js");
 const { asyncHandler, StatusCodeError } = require("../endpointHelper.js");
+const { pizzaPurchase } = require("../metrics");
 
 const orderRouter = express.Router();
 
@@ -115,6 +116,7 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
+    const start = process.hrtime.bigint();
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: "POST",
       headers: {
@@ -127,15 +129,22 @@ orderRouter.post(
       }),
     });
     const j = await r.json();
+    const end = process.hrtime.bigint();
+    const latency = Number(end - start) / 1_000_000;
     if (r.ok) {
+      pizzaPurchase(
+        true,
+        latency,
+        order.items.length,
+        order.items.reduce((acc, cv) => acc + cv.price, 0),
+      );
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
-      res
-        .status(500)
-        .send({
-          message: "Failed to fulfill order at factory",
-          followLinkToEndChaos: j.reportUrl,
-        });
+      pizzaPurchase(false, latency, 0, 0);
+      res.status(500).send({
+        message: "Failed to fulfill order at factory",
+        followLinkToEndChaos: j.reportUrl,
+      });
     }
   }),
 );
