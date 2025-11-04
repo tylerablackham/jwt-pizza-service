@@ -83,8 +83,8 @@ function latencyTracker(req, res, next) {
 }
 
 function updateLatency(latency) {
-  latency.service =
-    latency.service === 0 ? latency : (latency + latency.service) / 2;
+  latencies.service =
+    latencies.service === 0 ? latency : (latency + latencies.service) / 2;
 }
 
 // every 10 seconds
