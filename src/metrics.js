@@ -39,7 +39,7 @@ function pizzaPurchase(successful, latency, numPizzas, cost) {
     pizzas.failures++;
   }
   latencies.pizzaCreation =
-    latency.pizzaCreation === 0
+    latencies.pizzaCreation === 0
       ? latency
       : (latency + latencies.pizzaCreation) / 2;
   pizzas.numSold += numPizzas;
@@ -126,7 +126,7 @@ setInterval(() => {
     }),
   );
   metrics.push(
-    createMetric("request_latency", latencies.service, "s", "sum", "asDouble", {
+    createMetric("request_latency", latencies.service, "1", "sum", "asDouble", {
       type: "latency",
     }),
   );
@@ -134,7 +134,7 @@ setInterval(() => {
     createMetric(
       "pizza_latency",
       latencies.pizzaCreation,
-      "s",
+      "1",
       "sum",
       "asDouble",
       {
@@ -143,21 +143,14 @@ setInterval(() => {
     ),
   );
   metrics.push(
-    createMetric("pizzas_sold_per_min", pizzas.numSold, "1", "sum", "asInt", {
+    createMetric("pizzas_sold", pizzas.numSold, "1", "sum", "asInt", {
       type: "pizza",
     }),
   );
   metrics.push(
-    createMetric(
-      "pizza_revenue_per_min",
-      pizzas.revenue,
-      "BTC",
-      "sum",
-      "asDouble",
-      {
-        type: "pizza",
-      },
-    ),
+    createMetric("pizza_revenue", pizzas.revenue, "BTC", "sum", "asDouble", {
+      type: "pizza",
+    }),
   );
   metrics.push(
     createMetric(
@@ -178,6 +171,7 @@ setInterval(() => {
   );
 
   sendMetricToGrafana(metrics);
+  pizzas.failures = 0;
 }, 10_000);
 
 function createMetric(
