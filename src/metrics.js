@@ -142,33 +142,16 @@ setInterval(() => {
       },
     ),
   );
-
-  sendMetricToGrafana(metrics);
-}, 10_000);
-
-// every minute
-setInterval(() => {
-  const metrics = [];
-
-  const numSold = pizzas.numSold;
-  pizzas.numSold = 0;
-  const revenue = pizzas.revenue;
-  pizzas.revenue = 0;
-  const authSuccesses = auth.successes;
-  auth.successes = 0;
-  const authFailures = auth.failures;
-  auth.failures = 0;
-
   metrics.push(
-    createMetric("pizzas_sold_per_min", numSold, "1/min", "sum", "asInt", {
+    createMetric("pizzas_sold_per_min", pizzas.numSold, "1", "sum", "asInt", {
       type: "pizza",
     }),
   );
   metrics.push(
     createMetric(
       "pizza_revenue_per_min",
-      revenue,
-      "BTC/min",
+      pizzas.revenue,
+      "BTC",
       "sum",
       "asDouble",
       {
@@ -179,8 +162,8 @@ setInterval(() => {
   metrics.push(
     createMetric(
       "auth_successes_per_min",
-      authSuccesses,
-      "1/min",
+      auth.successes,
+      "1",
       "sum",
       "asInt",
       {
@@ -189,20 +172,13 @@ setInterval(() => {
     ),
   );
   metrics.push(
-    createMetric(
-      "auth_failures_per_min",
-      authFailures,
-      "1/min",
-      "sum",
-      "asInt",
-      {
-        type: "auth",
-      },
-    ),
+    createMetric("auth_failures_per_min", auth.failures, "1", "sum", "asInt", {
+      type: "auth",
+    }),
   );
 
   sendMetricToGrafana(metrics);
-}, 60_000);
+}, 10_000);
 
 function createMetric(
   metricName,
