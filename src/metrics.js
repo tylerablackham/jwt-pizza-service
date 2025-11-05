@@ -171,7 +171,6 @@ setInterval(() => {
   );
 
   sendMetricToGrafana(metrics);
-  pizzas.failures = 0;
 }, 10_000);
 
 function createMetric(
