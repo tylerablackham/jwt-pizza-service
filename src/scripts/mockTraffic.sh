@@ -28,6 +28,7 @@ while true; do
   response3=$(curl -X PUT $host/api/auth -d "{\"email\":\"$name@jwt.com\", \"password\":\"pass\"}" -H 'Content-Type: application/json')
   token2=$(echo $response3 | jq -r '.token')
   curl -X DELETE $host/api/auth -H "Authorization: Bearer $token2" > /dev/null
+  curl -X GET $host/api/crash > /dev/null
   sleep $((RANDOM % 2 + 1))
 done &
 pid1=$!

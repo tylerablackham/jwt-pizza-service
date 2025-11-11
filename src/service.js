@@ -6,6 +6,11 @@ const userRouter = require("./routes/userRouter.js");
 const version = require("./version.json");
 const config = require("./config.js");
 const { latencyTracker, requestTracker } = require("./metrics");
+const { logger } = require("./logger");
+
+process.on("uncaughtException", (err) => {
+  logger.unhandledErrorLogger(err);
+});
 
 const app = express();
 app.use(latencyTracker);
@@ -19,9 +24,17 @@ app.use((req, res, next) => {
   next();
 });
 app.use(requestTracker);
+app.use(logger.httpLogger);
 
 const apiRouter = express.Router();
 app.use("/api", apiRouter);
+apiRouter.get("/crash", (req, res) => {
+  setTimeout(() => {
+    throw new Error("Boom! Uncaught exception test");
+  }, 0);
+
+  res.send("Testing exception handler...");
+});
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/order", orderRouter);

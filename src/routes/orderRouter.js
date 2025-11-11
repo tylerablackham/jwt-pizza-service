@@ -4,6 +4,7 @@ const { Role, DB } = require("../database/database.js");
 const { authRouter } = require("./authRouter.js");
 const { asyncHandler, StatusCodeError } = require("../endpointHelper.js");
 const { pizzaPurchase } = require("../metrics");
+const { logger } = require("../logger");
 
 const orderRouter = express.Router();
 
@@ -131,6 +132,11 @@ orderRouter.post(
     const j = await r.json();
     const end = process.hrtime.bigint();
     const latency = Number(end - start) / 1_000_000;
+    const orderInfo = {
+      req: req.body,
+      res: j,
+    };
+    logger.factoryLogger(orderInfo);
     if (r.ok) {
       pizzaPurchase(
         true,
