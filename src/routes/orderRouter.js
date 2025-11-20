@@ -11,6 +11,16 @@ let enableChaos = false;
 
 orderRouter.docs = [
   {
+    method: "PUT",
+    path: "api/order/chaos/:state",
+    description: "Add chaos to the order route",
+    example:
+      'curl -X PUT $host/api/order/chaos/true  -H "Authorization: Bearer $token"',
+    response: {
+      chaos: true,
+    },
+  },
+  {
     method: "GET",
     path: "/api/order/menu",
     description: "Get the pizza menu",
