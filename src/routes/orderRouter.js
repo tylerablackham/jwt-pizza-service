@@ -7,6 +7,7 @@ const { pizzaPurchase } = require("../metrics");
 const { logger } = require("../logger");
 
 const orderRouter = express.Router();
+let enableChaos = false;
 
 orderRouter.docs = [
   {
@@ -78,6 +79,19 @@ orderRouter.docs = [
   },
 ];
 
+// setChaos
+orderRouter.put(
+  "/chaos/:state",
+  authRouter.authenticateToken,
+  asyncHandler(async (req, res) => {
+    if (req.user.isRole(Role.Admin)) {
+      enableChaos = req.params.state === "true";
+    }
+
+    res.json({ chaos: enableChaos });
+  }),
+);
+
 // getMenu
 orderRouter.get(
   "/menu",
@@ -113,6 +127,13 @@ orderRouter.get(
 // createOrder
 orderRouter.post(
   "/",
+  (req, res, next) => {
+    if (enableChaos && Math.random() < 0.5) {
+      pizzaPurchase(false, 0, 0, 0);
+      throw new StatusCodeError("Chaos monkey", 500);
+    }
+    next();
+  },
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
