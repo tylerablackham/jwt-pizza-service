@@ -20,6 +20,20 @@ class DB {
     }
   }
 
+  async getMenuItem(id) {
+    const connection = await this.getConnection();
+    try {
+      const row = await this.query(
+        connection,
+        `SELECT * FROM menu WHERE id=?`,
+        [id],
+      );
+      return row.length > 0 ? row[0] : null;
+    } finally {
+      connection.end();
+    }
+  }
+
   async addMenuItem(item) {
     const connection = await this.getConnection();
     try {

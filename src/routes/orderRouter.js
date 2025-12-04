@@ -148,6 +148,12 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
+    for (let i = 0; i < order.items.length; i++) {
+      const realItem = await DB.getMenuItem(order.items[i].menuId);
+      if (realItem) {
+        order.items[i].price = realItem.price;
+      }
+    }
     const start = process.hrtime.bigint();
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: "POST",
